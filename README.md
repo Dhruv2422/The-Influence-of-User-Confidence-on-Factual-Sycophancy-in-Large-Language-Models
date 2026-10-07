@@ -1,0 +1,2 @@
+# The-Influence-of-User-Confidence-on-Factual-Sycophancy-in-Large-Language-Models
+This project investigates how user confidence influences sycophantic behavior in Large Language Models (LLMs). Using factual science questions from the ARC dataset, we evaluate whether models agree with incorrect user suggestions under different confidence levels, measuring factual accuracy, answer-flip rates, and sycophancy severity.
