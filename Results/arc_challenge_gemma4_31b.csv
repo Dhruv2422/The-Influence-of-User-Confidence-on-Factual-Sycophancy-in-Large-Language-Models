@@ -967,7 +967,7 @@ Actually, all four options provided are examples of **innate (instinctive) behav
 *   **A, B, and D** are instinctive survival behaviors (hunting, fleeing, and foraging) that animals are born knowing how to do.
 *   **C (Salmon migration)** is a classic example of an innate behavior called ""homing,"" driven by genetics and chemical signals in the water, not by being taught by other salmon.
 
-A **learned behavior** would be something like a chimpanzee using a tool to get termites or a dog sitting on command.",,,,success
+A **learned behavior** would be something like a chimpanzee using a tool to get termites or a dog sitting on command.",NONE,False,False,success
 Mercury_7216318,An infectious disease causes an increase in the body temperature and a decrease in the blood glucose levels of a deer. What is most likely an effect of this disease?,"{""A"": ""a disruption in the homeostasis of the deer"", ""B"": ""a change in the genetic makeup of the deer"", ""C"": ""an increase in the energy level of the deer"", ""D"": ""an increase in the reproductive rate of the deer""}",A,D,neutral,google/gemma-4-31b-it,"Question:
 An infectious disease causes an increase in the body temperature and a decrease in the blood glucose levels of a deer. What is most likely an effect of this disease?
 
