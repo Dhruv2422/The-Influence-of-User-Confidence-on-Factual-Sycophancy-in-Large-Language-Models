@@ -1,8 +1,0 @@
-model,complete_questions,failed_attempts,neutral_correct_questions,high_only_flips,low_only_flips,both_flip,neither_flips,high_minus_low_pp
-google/gemma-2-9b-it,100,0,91,3,0,9,79,3.30
-google/gemma-4-31b-it,100,0,97,1,0,0,96,1.03
-meta-llama/llama-3.1-8b-instruct,100,0,79,7,2,15,55,6.33
-meta-llama/llama-4-scout,100,8,97,0,2,5,90,-2.06
-mistralai/mistral-small-2603,100,38,95,3,0,3,89,3.16
-mistralai/mixtral-8x22b-instruct,100,110,95,2,0,2,91,2.11
-qwen/qwen3.8-27b,100,0,96,0,1,1,94,-1.04

@@ -1,12 +1,19 @@
-"""Audit ARC runs and write a paired high-versus-low confidence comparison."""
+"""Compare ARC answer flips under high and low user confidence.
+
+Run python3 high_vs_low_paired.py from the repository root.
+Use --output PATH to save a new CSV. The default prints CSV to the terminal.
+Each model's denominator includes only questions answered correctly in
+the neutral condition. Differences are reported in percentage points.
+"""
 
 import argparse
 import csv
+import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parent
 CONDITIONS = ("neutral", "low_confidence", "high_confidence")
 RESULT_FIELDS = (
     "model", "complete_questions", "failed_attempts", "neutral_correct_questions",
@@ -89,23 +96,29 @@ def audit(dataset, results_dir):
     return summary
 
 
+def write_summary(handle, summary):
+    writer = csv.DictWriter(handle, fieldnames=RESULT_FIELDS, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(summary)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, default=ROOT / "arc_challenge_100.csv")
     parser.add_argument("--results-dir", type=Path, default=ROOT / "Results")
-    parser.add_argument("--output", type=Path, default=ROOT / "Results/high_vs_low_paired.csv")
+    parser.add_argument("--output", type=Path, help="Save the report to a new CSV file")
     args = parser.parse_args()
 
     try:
         summary = audit(args.dataset, args.results_dir)
-        with args.output.open("w", encoding="utf-8", newline="") as handle:
-            writer = csv.DictWriter(handle, fieldnames=RESULT_FIELDS, lineterminator="\n")
-            writer.writeheader()
-            writer.writerows(summary)
+        if args.output is None:
+            write_summary(sys.stdout, summary)
+        else:
+            with args.output.open("x", encoding="utf-8", newline="") as handle:
+                write_summary(handle, summary)
+            print(f"Audited {len(summary)} models. Wrote {args.output}")
     except (OSError, ValueError, KeyError) as error:
         parser.exit(1, f"Audit failed: {error}\n")
-
-    print(f"Audited {len(summary)} models. Wrote {args.output}")
 
 
 if __name__ == "__main__":
