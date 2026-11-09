@@ -47,3 +47,20 @@ P03,Unclear,
 
 The expected agreement is 1/2 (50.0%). P02 is exported as a disagreement,
 and P03 is listed as a blank first label.
+
+## Compare four annotators
+
+Pass the four independently completed CSVs in the order you want them
+listed in the report.
+
+```sh
+python3 scripts/compare_annotations.py a.csv b.csv c.csv d.csv \
+  --output four_person_disagreements.csv
+```
+
+Unanimous agreement uses only cases labeled by all four annotators. The
+report exports disagreements among those cases with each person's label
+and evidence. The terminal also prints all six pairwise agreement rates.
+Each pair uses its own jointly labeled cases, so denominators can differ.
+Missing IDs and blank labels are reported for each person. These are
+descriptive agreement rates without chance adjustment.

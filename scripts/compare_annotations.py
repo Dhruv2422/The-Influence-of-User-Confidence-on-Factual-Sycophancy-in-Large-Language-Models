@@ -1,7 +1,8 @@
-"""Compare two independently annotated CSVs by case ID."""
+"""Compare independently annotated CSVs by case ID."""
 
 import argparse
 import csv
+from itertools import combinations
 from pathlib import Path
 
 
@@ -31,18 +32,68 @@ def read_annotations(path):
     return annotations
 
 
+def compare_group(annotations, output):
+    case_ids = sorted(set().union(*annotations))
+    indexed = [
+        (case_id, [sheet.get(case_id, ("", "")) for sheet in annotations])
+        for case_id in case_ids
+    ]
+    complete = [(case_id, votes) for case_id, votes in indexed if all(label for label, _ in votes)]
+    disagreements = [
+        (case_id, votes) for case_id, votes in complete
+        if len({label for label, _ in votes}) > 1
+    ]
+
+    headers = ["case_id"]
+    for number in range(1, len(annotations) + 1):
+        headers.extend((f"annotator_{number}_label", f"annotator_{number}_evidence"))
+    with output.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(headers)
+        for case_id, votes in disagreements:
+            writer.writerow([case_id, *(value for vote in votes for value in vote)])
+
+    print(f"Cases labeled by everyone: {len(complete)}/{len(case_ids)}")
+    for number, sheet in enumerate(annotations, start=1):
+        absent = sum(case_id not in sheet for case_id in case_ids)
+        blank = sum(not label for label, _ in sheet.values())
+        print(f"Annotator {number}: {absent} missing IDs, {blank} blank labels")
+    print_agreement("Unanimous agreement", len(complete) - len(disagreements), len(complete))
+    for i, j in combinations(range(len(annotations)), 2):
+        pairs = [(votes[i][0], votes[j][0]) for _, votes in indexed if votes[i][0] and votes[j][0]]
+        print_agreement(f"Annotators {i + 1} vs {j + 1}", sum(a == b for a, b in pairs), len(pairs))
+    print(f"Wrote {len(disagreements)} disagreements to {output}")
+
+
+def print_agreement(name, agreed, compared):
+    if compared:
+        print(f"{name}: {agreed}/{compared} ({agreed / compared:.1%})")
+    else:
+        print(f"{name}: unavailable (no jointly labeled cases)")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("first", type=Path, help="First annotator's CSV")
     parser.add_argument("second", type=Path, help="Second annotator's CSV")
+    parser.add_argument("additional", nargs="*", type=Path, help="Additional annotators’ CSVs")
     parser.add_argument("--output", type=Path, default=Path("annotation_disagreements.csv"))
     args = parser.parse_args()
 
     try:
-        if args.output.resolve() in {args.first.resolve(), args.second.resolve()}:
+        inputs = [args.first, args.second, *args.additional]
+        paths = {path.resolve() for path in inputs}
+        if len(paths) != len(inputs):
+            raise ValueError("Each annotator must have a separate input CSV.")
+        if args.output.resolve() in paths:
             raise ValueError("The report must have a different path from both inputs.")
-        first = read_annotations(args.first)
-        second = read_annotations(args.second)
+        annotations = [read_annotations(path) for path in inputs]
+        if args.additional:
+            for number, path in enumerate(inputs, start=1):
+                print(f"Annotator {number}: {path}")
+            compare_group(annotations, args.output)
+            return
+        first, second = annotations
         shared = sorted(first.keys() & second.keys())
         compared = 0
         disagreements = []
@@ -71,10 +122,7 @@ def main():
         print(f"{name}: {len(cases)}" + (f" ({', '.join(cases)})" if cases else ""))
 
     agreed = compared - len(disagreements)
-    if compared:
-        print(f"Exact agreement: {agreed}/{compared} ({agreed / compared:.1%})")
-    else:
-        print("Exact agreement: unavailable (no jointly labeled cases)")
+    print_agreement("Exact agreement", agreed, compared)
     print(f"Wrote {len(disagreements)} disagreements to {args.output}")
 
 
