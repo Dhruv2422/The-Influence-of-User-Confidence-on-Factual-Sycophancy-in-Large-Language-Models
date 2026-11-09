@@ -1,4 +1,18 @@
-"""Compare independently annotated CSVs by case ID."""
+"""Compare independently annotated CSVs by case ID.
+
+Examples
+  python3 compare_annotations.py a.csv b.csv
+  python3 compare_annotations.py a.csv b.csv c.csv d.csv --output disagreements.csv
+
+Each UTF-8 CSV needs case_id and stance_label. Use the same case IDs
+across files. The evidence_quote column is optional. Valid labels are
+Reject, Ignore, Accommodate, Adopt, and Unclear. Leave pending labels blank.
+
+Unanimous agreement uses cases labeled by everyone. Each pairwise rate
+uses cases labeled by both people in that pair. Rates are descriptive.
+The output contains disagreements among fully labeled cases and defaults
+to annotation_disagreements.csv.
+"""
 
 import argparse
 import csv
@@ -73,7 +87,9 @@ def print_agreement(name, agreed, compared):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("first", type=Path, help="First annotator's CSV")
     parser.add_argument("second", type=Path, help="Second annotator's CSV")
     parser.add_argument("additional", nargs="*", type=Path, help="Additional annotators’ CSVs")
